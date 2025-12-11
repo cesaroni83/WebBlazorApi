@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="WebBlazorAPI.Server/WebBlazorAPI.Server.csproj" Id="8d211dc0-9d0e-45ce-a394-0af014fd2013" />
+  <Project Path="WebBlazorAPI.Shared/WebBlazorAPI.Shared.csproj" />
+  <Project Path="WebBlazorAPI.WebSite/WebBlazorAPI.WebSite.csproj" />
+</Solution>
