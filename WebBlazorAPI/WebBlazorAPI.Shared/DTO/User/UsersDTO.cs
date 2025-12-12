@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
-using WebBlazorAPI.Shared.Modelo;
+using WebBlazorAPI.Shared.DTO.Ciudad;
+using WebBlazorAPI.Shared.Enums;
 
-namespace WebBlazorAPI.Shared.Enums
+namespace WebBlazorAPI.Shared.DTO.User
 {
-    public class User : IdentityUser
+    public class UsersDTO : IdentityUser
     {
         [Display(Name = "Nombres")]
         [MaxLength(50, ErrorMessage = "El campo {0} debe tener máximo {1} caractéres.")]
@@ -27,17 +28,18 @@ namespace WebBlazorAPI.Shared.Enums
         [Display(Name = "Tipo de usuario")]
         public UserType UserType { get; set; }
 
-        public Ciudad? Ciudades { get; set; }
+        public CiudadDTO? Ciudades { get; set; }
+
+        public string Nombre_Ciudad => Ciudades?.Nombre_ciudad ?? "";
 
         [Display(Name = "Ciudad")]
+        [Required(ErrorMessage = "El campo {0} es obligatorio.")]
         [Range(1, int.MaxValue, ErrorMessage = "Debes seleccionar una {0}.")]
         public int Id_ciudad { get; set; }
 
         [Display(Name = "Usuario")]
         public string FullName => $"{FirstName} {LastName}";
-        public Persona? Personas { get; set; }
 
-        public ICollection<Venta> Ventas { get; set; }=new List<Venta>();
-        public ICollection<TemporalSale> VentasTemporales { get; set; }=new List<TemporalSale>();
+        public string? Passwords { get; set; } = null!;
     }
 }
