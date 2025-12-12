@@ -1,0 +1,57 @@
+﻿using Microsoft.AspNetCore.Identity;
+using WebBlazorAPI.Shared.Account;
+using WebBlazorAPI.Shared.DTO.User;
+using WebBlazorAPI.Shared.Enums;
+
+namespace WebBlazorAPI.Server.Helper
+{
+   
+        public interface IUserHelper
+        {
+            Task<User> GetUserAsync(string email);
+
+            Task<IdentityResult> AddUserAsync(User user, string password);
+
+            Task CheckRoleAsync(string roleName);
+
+            Task AddUserToRoleAsync(User user, string roleName);
+
+            Task<bool> IsUserInRoleAsync(User user, string roleName);
+
+            Task<SignInResult> LoginAsync(LoginDTO model);
+
+            Task LogoutAsync();
+
+            Task<IdentityResult> ChangePasswordAsync(User user, string currentPassword, string newPassword);
+
+            Task<IdentityResult> UpdateUserAsync(User user);
+
+            Task<User> GetUserAsync(Guid userId);
+
+            Task<string> GenerateEmailConfirmationTokenAsync(User user);
+
+            Task<IdentityResult> ConfirmEmailAsync(User user, string token);
+
+            Task<string> GeneratePasswordResetTokenAsync(User user);
+
+            Task<IdentityResult> ResetPasswordAsync(User user, string token, string password);
+
+            Task<IdentityResult> AddOrUpdateUserWithPersonaAsync(User user);
+
+            // 👇 Nuevos métodos para login externo
+            Task<ExternalLoginInfo?> GetExternalLoginInfoAsync();
+
+            Task<SignInResult> ExternalLoginSignInAsync(string loginProvider, string providerKey);
+
+            Task<IdentityResult> AddLoginAsync(User user, UserLoginInfo loginInfo);
+
+            Task<User> CreateUserFromExternalLoginAsync(ExternalLoginInfo info, string email);
+
+            // 👇 Nuevos métodos para Lista de Usuarios
+
+
+            Task<UsersDTO> GetUser(string Email);
+
+        }
+
+}

@@ -4,6 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>64dd56ac-5573-4e2d-ac25-bb22e7742aca</UserSecretsId>
   </PropertyGroup>
 
 	
@@ -35,6 +36,11 @@
 	
   <ItemGroup>
     <ProjectReference Include="..\WebBlazorAPI.Shared\WebBlazorAPI.Shared.csproj" />
+  </ItemGroup>
+
+	
+  <ItemGroup>
+    <Folder Include="wwwroot\UserImagen\" />
   </ItemGroup>
 
 </Project>
