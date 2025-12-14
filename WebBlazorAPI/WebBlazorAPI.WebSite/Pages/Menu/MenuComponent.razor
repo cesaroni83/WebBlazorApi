@@ -1,0 +1,250 @@
+﻿@using WebBlazorAPI.Shared.DTO.Menu
+@using WebBlazorAPI.Shared.Estatico
+@using WebBlazorAPI.WebSite.Repositorio
+
+@inject ToastService ToastService
+@inject SweetAlertService sweetAlertService
+@inject IRepository repository
+
+
+<div class="principal">
+    <div class="formulario">
+
+        <!-- Título -->
+        <div class="form-panel">
+            <h2 class="form-title"><i class="bi bi-ui-checks-grid"></i>@Titulo</h2>
+        </div>
+
+        <EditForm Model="Input" OnValidSubmit="SubmitForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary></ValidationSummary>
+
+            <div class="form-wrapper">
+
+                <!-- Descripción -->
+                <div class="form-group">
+                    <label>Descripcion:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-pencil-alt"></i></span>
+                        <input type="text" @bind="Input.Descripcion" class="form-control" placeholder="Descripcion" />
+                    </div>
+                    <ValidationMessage For="() => Input.Descripcion" />
+                </div>
+
+                <!-- Referencia -->
+                <div class="form-group">
+                    <label>Referencia:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-link"></i></span>
+                        <input type="text" @bind="Input.Referencia" class="form-control" placeholder="Referencia" />
+                    </div>
+                </div>
+
+                <!-- Información -->
+                <div class="form-group" style="flex:1 1 100%">
+                    <label>Información:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-info-circle"></i></span>
+                        <textarea @bind="Input.Informacion_menu" class="form-control" rows="4" placeholder="Ingrese información"></textarea>
+                    </div>
+                </div>
+
+                <!-- Nombre Icono -->
+                <div class="form-group">
+                    <label>Nombre Icono:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-icons"></i></span>
+                        <select @onchange="@(e => CambiaNombre(e))" class="form-control">
+                            <option value="">Seleccione</option>
+                            @foreach (var item in Iconos)
+                            {
+                                <option value="@item.Id" selected="@(item.Id == Input!.Icono_name)">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Color Icono -->
+                <div class="form-group">
+                    <label>Color:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-palette"></i></span>
+                        <select @onchange="@CambiaColor" class="form-control">
+                            <option value="">Seleccione</option>
+                            @foreach (var item in Colores)
+                            {
+                                <option value="@item.Id" selected="@(item.Id == Input!.Icono_color)">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Imagen Previa -->
+                <div class="form-group">
+                    <label>Imagen Previa:</label>
+                    <div class="input-icon">
+                        <br />
+                        <Icon Name="@(nombre ?? IconName.Question)"
+                              Size="IconSize.x1"
+                              Color="@(color ?? IconColor.Primary)" />
+                        <br />
+                    </div>
+                </div>
+
+                <!-- Menu Padre -->
+                <div class="form-group">
+                    <label>Menu Padre:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-sitemap"></i></span>
+                        <select @bind="Input.Id_parend" class="form-control">
+                            <option value="">Seleccione</option>
+                            @foreach (var item in MenuPadre!)
+                            {
+                                <option value="@item.Id_menu">@item.Descripcion</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Estado -->
+                <div class="form-group">
+                    <label>Estado:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-list"></i></span>
+                        <select @bind="Input.Estado_menu" class="form-control">
+                            <option value="">Seleccione</option>
+                            @foreach (var item in items)
+                            {
+                                <option value="@item.Id">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <ValidationMessage For="() => Input.Estado_menu" />
+                </div>
+
+                <!-- Botones -->
+                <div class="buttons-container">
+                    <button type="submit" class="btn btn-primary">@SubmitButtonText</button>
+                    <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                </div>
+
+            </div>
+        </EditForm>
+
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance Modal { get; set; } = default!;
+    [Parameter] public MenuDTO InputDTO { get; set; } = new MenuDTO();
+    [Parameter] public string SubmitButtonText { get; set; } = string.Empty;
+    [Parameter] public string Titulo { get; set; } = string.Empty;
+
+
+    private MenuDTO Input = new();
+
+
+    private List<Estado> items = new();
+    private List<IconoColor> Colores = new();
+    private List<Icono> Iconos = new();
+    private List<MenuDropDTO>? MenuPadre=new();
+    private string Estados = "A";
+    private IconName? nombre;
+    private IconColor? color;
+
+    protected override async Task OnInitializedAsync()
+    {
+        items = Estado.GetItems();
+        Colores = IconoColor.GetItems();
+        Iconos = Icono.GetItems();
+        await LoadMenuPadre();
+        if (InputDTO != null)
+        {
+            Input = InputDTO;
+            var valorColor = IconoColor.GetTextIconoColor(Input.Icono_color ?? "");
+            if (Enum.TryParse<IconColor>(valorColor, true, out var parsedColor))
+                color = parsedColor;
+            else
+                color = IconColor.Primary;
+
+            var valorNombre = Icono.GetTextIcono(Input.Icono_name ?? "");
+            if (Enum.TryParse<IconName>(valorNombre, true, out var parsedNombre))
+                nombre = parsedNombre;
+            else
+                nombre = IconName.Question;
+            //previewUrl = Input.Foto_pais != null ? $"data:image/jpeg;base64,{Convert.ToBase64String(Input.Foto_pais)}" : null;
+        }
+    }
+    private async Task LoadMenuPadre()
+    {
+        var responseHttp = await repository.Get<List<MenuDropDTO>>($"/api/Menus/ComboMenu/{Estados}");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        MenuPadre = responseHttp.Response;
+    }
+    private void CambiaColor(ChangeEventArgs e)
+    {
+        var idColor = e.Value?.ToString();
+        Input.Icono_color = idColor;
+        var valor = IconoColor.GetTextIconoColor(idColor!);
+        if (Enum.TryParse<IconColor>(valor, true, out var parsed))
+            color = parsed;
+        StateHasChanged();
+    }
+    private void CambiaNombre(ChangeEventArgs e)
+    {
+        var Idnombre = e.Value?.ToString();
+        Input.Icono_name = Idnombre;
+        var value = Icono.GetTextIcono(Idnombre!);
+        if (Enum.TryParse<IconName>(value, true, out var parsed))
+            nombre = parsed;
+        StateHasChanged();
+    }
+
+
+    private async Task Cancelar()
+    {
+        await Modal.CancelAsync();
+    }
+
+    private async Task SubmitForm()
+    {
+       
+        if (SubmitButtonText == "Save")
+        {
+            
+            var responseHttp = await repository.Post<MenuDTO>("/api/Menus/", Input);
+            if (responseHttp.Error)
+            {
+                var message = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+                return;
+            }
+            ToastService.Notify(new(ToastType.Success, $"Record Pais Update Successfully."));
+            await Task.Delay(3000);
+            await Modal.CloseAsync(ModalResult.Ok(Input));
+            return;
+        }
+        if (SubmitButtonText == "Update")
+        {
+            // var responseHttp = await repository.Put<MenuDTO>($"/api/Menus/{Input.Id_menu}", Input);
+             var responseHttp = await repository.Put<MenuDTO>($"/api/Menus/", Input);
+            if (responseHttp.Error)
+            {
+                var message = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+                return;
+            }
+
+            ToastService.Notify(new(ToastType.Success, $"Record Pais Saved Successfully."));
+            await Task.Delay(3000);
+            await Modal.CloseAsync(ModalResult.Ok(Input));
+            return;
+        }
+    }
+}

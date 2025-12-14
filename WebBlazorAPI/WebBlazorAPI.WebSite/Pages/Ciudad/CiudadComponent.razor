@@ -1,0 +1,235 @@
+﻿@using WebBlazorAPI.Shared.DTO.Ciudad
+@using WebBlazorAPI.Shared.DTO.Pais
+@using WebBlazorAPI.Shared.DTO.Provincia
+@using WebBlazorAPI.Shared.Estatico
+@using WebBlazorAPI.WebSite.Repositorio
+
+
+@inject ToastService ToastService
+@inject SweetAlertService sweetAlertService
+@inject IRepository repository
+
+<div class="principal">
+    <div class="formulario">
+
+        <!-- Título -->
+        <div class="form-panel">
+            <h2 class="form-title"><i class="bi bi-ui-checks-grid"></i>@Titulo</h2>
+        </div>
+
+        <EditForm Model="Input" OnValidSubmit="SubmitForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary></ValidationSummary>
+            <div class="form-wrapper">
+
+                <!-- País -->
+                <div class="form-group">
+                    <label>Nombre País:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-globe"></i></span>
+                        <select @onchange="CountryChangedAsync" class="form-control">
+                            <option value="0">Seleccione País</option>
+                            @if (countries is not null)
+                            {
+                                @foreach (var country in countries)
+                                {
+                                    <option value="@country.Id_pais" selected="@(country.Id_pais == Input?.Provincias?.Paises?.Id_pais)">
+                                        @country.Nombre_pais
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    
+                </div>
+
+                <!-- Provincia -->
+                <div class="form-group">
+                    <label>Nombre Provincia:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-map"></i></span>
+                        <select @onchange="StateChangedAsync" class="form-control">
+                            <option value="">Seleccione Provincia</option>
+                            @if (states is not null)
+                            {
+                                @foreach (var state in states)
+                                {
+                                    <option value="@state.Id_provincia" selected="@(state.Id_provincia == Input?.Id_provincia)">
+                                        @state.Nombre_provincia
+                                    </option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <ValidationMessage For="() => Input.Id_provincia" />
+                </div>
+
+                <!-- Ciudad -->
+                <div class="form-group">
+                    <label>Nombre Ciudad:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-city"></i></span>
+                        <input type="text" @bind="Input!.Nombre_ciudad" class="form-control" placeholder="Nombre Ciudad" />
+                    </div>
+                    <ValidationMessage For="() => Input.Nombre_ciudad" />
+                </div>
+
+                <!-- Información -->
+                <div class="form-group" style="flex:1 1 100%">
+                    <label>Información:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-info-circle"></i></span>
+                        <textarea @bind="Input.Informacion_ciudad" class="form-control" rows="4" placeholder="Ingrese información"></textarea>
+                    </div>
+                </div>
+
+                <!-- Estado -->
+                <div class="form-group">
+                    <label>Estado:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-list"></i></span>
+                        <select @bind="Input.Estado_ciudad" class="form-control">
+                            <option value="">Seleccione</option>
+                            @foreach (var item in items)
+                            {
+                                <option value="@item.Id">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <ValidationMessage For="() => Input.Estado_ciudad" />
+                </div>
+
+                <!-- Botones -->
+                <div class="buttons-container">
+                    <button type="submit" class="btn btn-primary">@SubmitButtonText</button>
+                    <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                </div>
+
+            </div>
+        </EditForm>
+
+    </div>
+</div>
+
+@code {
+
+    [CascadingParameter] BlazoredModalInstance Modal { get; set; } = default!;
+    [Parameter] public CiudadDTO InputDTO { get; set; } = new CiudadDTO();
+    [Parameter] public string SubmitButtonText { get; set; } = string.Empty;
+    [Parameter] public string Titulo { get; set; } = string.Empty;
+    private List<PaisDropDTO>? countries;
+    private List<ProvinciaDropDTO>? states;
+    private CiudadDTO InputCreateReg { get; set; } = new CiudadDTO();
+    private CiudadDTO Input { get; set; } = new CiudadDTO();
+    private List<Estado> items = new();
+    string Estados = "A";
+
+    private async Task SubmitForm()
+    {
+        if (SubmitButtonText == "Save")
+        {
+            InputCreateReg.Nombre_ciudad = Input.Nombre_ciudad;
+            InputCreateReg.Id_provincia = Input.Id_provincia;
+            InputCreateReg.Informacion_ciudad = Input.Informacion_ciudad;
+            InputCreateReg.Estado_ciudad = Input.Estado_ciudad;
+            var responseHttp = await repository.Post<CiudadDTO>("/api/Ciudades/", InputCreateReg);
+            if (responseHttp.Error)
+            {
+                var message = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+                return;
+            }
+            ToastService.Notify(new(ToastType.Success, $"Record Pais Update Successfully."));
+            await Task.Delay(3000);
+            await Modal.CloseAsync(ModalResult.Ok(Input));
+            return;
+        }
+        if (SubmitButtonText == "Update")
+        {
+            var responseHttp = await repository.Put<CiudadDTO>($"/api/Ciudades/", Input);
+            if (responseHttp.Error)
+            {
+                var message = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+                return;
+            }
+            ToastService.Notify(new(ToastType.Success, $"Record Pais Saved Successfully."));
+            await Task.Delay(3000);
+            await Modal.CloseAsync(ModalResult.Ok(Input));
+            return;
+        }
+    }
+
+    private async Task Cancelar()
+    {
+        await Modal.CancelAsync();
+    }
+
+    private async Task LoadCountriesAsync()
+    {
+        var responseHttp = await repository.Get<List<PaisDropDTO>>($"/api/Paises/ComboPais/{Estados}");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        countries = responseHttp.Response;
+    }
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        items = Estado.GetItems();
+        await LoadCountriesAsync();
+        if (InputDTO.Nombre_ciudad != null)
+        {
+            var responseHttp = await repository.Get<CiudadDTO>($"/api/Ciudades/GetCiudad/{InputDTO.Id_ciudad}");
+            if (responseHttp.Error)
+            {
+                var message = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+                return;
+            }
+            Input= responseHttp.Response!;
+            await LoadStatesAsyn(Input.Provincias!.Paises!.Id_pais);
+            
+             
+        }else
+        {
+            Input = InputDTO;
+            Input.Provincias = new ProvinciaDTO
+            {
+                Paises = new PaisDTO()
+            };
+        }
+
+
+    }
+    private async Task LoadStatesAsyn(int countryId)
+    {
+        var responseHttp = await repository.Get<List<ProvinciaDropDTO>>($"/api/Provincias/ComboProvincia/{countryId}/{Estados}");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        states = responseHttp.Response;
+    }
+    private async Task CountryChangedAsync(ChangeEventArgs e)
+    {
+        var selectedCountry = Convert.ToInt32(e.Value!);
+
+        await LoadStatesAsyn(selectedCountry);
+    }
+
+    private async Task StateChangedAsync(ChangeEventArgs e)
+    {
+        var selectedState = Convert.ToInt32(e.Value!);
+        Input.Id_provincia = selectedState;
+        //await LoadCitiesAsyn(selectedState);
+    }
+}

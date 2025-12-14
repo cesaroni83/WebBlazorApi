@@ -1,0 +1,334 @@
+﻿
+@page "/Register"
+@using WebBlazorAPI.Shared.Account
+@using WebBlazorAPI.Shared.DTO.Ciudad
+@using WebBlazorAPI.Shared.DTO.Pais
+@using WebBlazorAPI.Shared.DTO.Provincia
+@using WebBlazorAPI.Shared.Enums
+@using WebBlazorAPI.WebSite.Repositorio
+
+@inject IRepository repository
+@inject SweetAlertService sweetAlertService
+@inject NavigationManager navigationManager
+@inject ILoginService loginService
+
+<div class="registerpage-principal">
+    <div class="registerpage-container">
+        <div class="registerpage-wrapper" >
+               <!-- PANEL IZQUIERDO (FORMULARIO) -->
+                <div class="registerpage-left-white registerpage-panel">
+                    <h2>Registro De Usuarios</h2>
+
+                    <EditForm class="register-form row g-3"
+                              Model="userDTO"
+                              OnValidSubmit="CreteUserAsync"
+                              FormName="Register">
+                        <DataAnnotationsValidator />
+                        
+                        <Tabs EnableFadeEffect="true" id="formTab">
+
+                            <!-- TAB 1: FORMULARIO PRINCIPAL -->
+                            <Tab Active="true">
+                                <TitleTemplate>
+                                    <Icon Name="IconName.HouseFill" /> Register
+                                </TitleTemplate>
+
+                                <Content>
+                                    <div class="row g-3">
+
+                                        <!-- NOMBRE -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Nombre</label>
+                                            <div class="input-wrapper">
+                                                <span class="input-icon"><i class="fas fa-user"></i></span>
+                                                <input class="form-control"
+                                                           @bind="userDTO.FirstName"
+                                                           placeholder="Nombre" />
+                                            </div>
+                                            <ValidationMessage For="@(() => userDTO.FirstName)" />
+                                        </div>
+
+                                        <!-- APELLIDO -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Apellido</label>
+                                            <div class="input-wrapper">
+                                                <span class="input-icon"><i class="fas fa-user"></i></span>
+                                                <input class="form-control"
+                                                           @bind="userDTO.LastName"
+                                                           placeholder="Apellido" />
+                                            </div>
+                                            <ValidationMessage For="@(() => userDTO.LastName)" />
+                                        </div>
+
+                                        <!-- PAIS -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">País</label>
+                                            <div class="input-wrapper">
+                                                <span class="input-icon"><i class="fas fa-globe"></i></span>
+                                                <select class="form-select" @onchange="CountryChangedAsync">
+                                                    <option value="0">Seleccione un País</option>
+                                                    @if (countries is not null)
+                                                    {
+                                                        foreach (var country in countries)
+                                                        {
+                                                            <option value="@country.Id_pais">@country.Nombre_pais</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- PROVINCIA -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Provincia</label>
+                                            <div class="input-wrapper">
+                                                <span class="input-icon"><i class="fas fa-map"></i></span>
+                                                <select class="form-select" @onchange="StateChangedAsync">
+                                                    <option value="0">Seleccione un Estado</option>
+                                                    @if (states is not null)
+                                                    {
+                                                        foreach (var state in states)
+                                                        {
+                                                            <option value="@state.Id_provincia">@state.Nombre_provincia</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- CIUDAD -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Ciudad</label>
+                                            <div class="input-wrapper">
+                                                <span class="input-icon"><i class="fas fa-city"></i></span>
+                                                <select class="form-select" @bind="userDTO.Id_ciudad">
+                                                    <option value="0">Seleccione una Ciudad</option>
+                                                    @if (cities is not null)
+                                                    {
+                                                        foreach (var city in cities)
+                                                        {
+                                                            <option value="@city.Id_ciudad">@city.Nombre_ciudad</option>
+                                                        }
+                                                    }
+                                                </select>
+                                            </div>
+                                            <ValidationMessage For="@(() => userDTO.Id_ciudad)" />
+                                        </div>
+
+                                        <!-- DIRECCION -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Dirección</label>
+                                            <div class="input-wrapper">
+                                                <span class="input-icon"><i class="fas fa-street-view"></i></span>
+                                                <input class="form-control"
+                                                           @bind="userDTO.Address"
+                                                           placeholder="Dirección" />
+                                            </div>
+                                            <ValidationMessage For="@(() => userDTO.Address)" />
+                                        </div>
+
+                                        <!-- TELÉFONO -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Teléfono</label>
+                                            <div class="input-wrapper">
+                                                <span class="input-icon"><i class="fas fa-phone"></i></span>
+                                                <input type="tel" class="form-control"
+                                                           @bind="userDTO.PhoneNumber"
+                                                           placeholder="Teléfono" />
+                                            </div>
+                                        </div>
+
+                                        <!-- EMAIL -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Email</label>
+                                            <div class="input-wrapper">
+                                                <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                                                <input type="email" class="form-control" required
+                                                           @bind="userDTO.Email"
+                                                           placeholder="Email" />
+                                            </div>
+                                            
+                                        </div>
+
+                                        <!-- PASSWORD -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Contraseña</label>
+                                            <div class="input-wrapper">
+                                                <span class="input-icon"><i class="fas fa-lock"></i></span>
+                                                <input type="password" class="form-control"
+                                                           @bind="userDTO.Password"
+                                                           placeholder="Contraseña" />
+                                            </div>
+                                            <ValidationMessage For="@(() => userDTO.Password)" />
+                                        </div>
+
+                                        <!-- CONFIRM PASSWORD -->
+                                        <div class="col-md-6">
+                                            <label class="form-label">Confirmar Contraseña</label>
+                                            <div class="input-wrapper">
+                                                <span class="input-icon"><i class="fas fa-lock"></i></span>
+                                                <input type="password" class="form-control" re
+                                                           @bind="userDTO.PasswordConfirm"
+                                                           placeholder="Confirmar Contraseña" />
+                                            </div>
+                                            <ValidationMessage For="@(() => userDTO.PasswordConfirm)" />
+                                        </div>
+
+                                        <!-- BOTONES -->
+                                        <div class="col-12 d-flex justify-content-center gap-2 mt-3">
+                                            <button type="submit" class="btn btn-primary">Registrar</button>
+                                        <button type="button" class="btn btn-secondary" @onclick="ResetForm">Reset</button>
+                                        </div>
+                                    </div>
+
+                                    <p class="text-center mt-4">O regístrate con</p>
+
+                                    <div class="registerpage-social-icons">
+                                        <button><i class="fab fa-google"></i></button>
+                                        <button><i class="fab fa-facebook-f"></i></button>
+                                        <button><i class="fab fa-pinterest"></i></button>
+                                        <button><i class="fab fa-linkedin-in"></i></button>
+                                    </div>
+
+                                </Content>
+                            </Tab>
+
+                            <!-- TAB 2: IMAGEN -->
+                            <Tab>
+                                <TitleTemplate>
+                                    <Icon Name="IconName.PersonFill" /> Imagen
+                                </TitleTemplate>
+
+                                <Content>
+                                    <div class="upload-form text-center mt-3">
+                                        <label class="form-label fw-bold">Selecciona una imagen para tu perfil:</label>
+                                        <InputImg ImageSelected="ImageSelected"
+                                                  ImageURL="@imageUrl"
+                                                  Label="Foto" />
+                                    </div>
+                                </Content>
+                            </Tab>
+
+                        </Tabs>
+                    </EditForm>
+                </div>
+                <!-- PANEL DERECHO (LOGIN) -->
+                <div class="registerpage-right-blue registerpage-panel">
+                    <h2>¡Bienvenido de nuevo!</h2>
+                    <p>¿Ya tienes una cuenta?</p>
+                    <button class="btn btn-light mt-2" @onclick="Login">Iniciar Sesión</button>
+                </div>
+         </div>
+    </div>
+</div>
+
+
+@code {
+    private UserDTO userDTO = new();
+    private List<PaisDropDTO>? countries;
+    private List<ProvinciaDropDTO>? states;
+    private List<CiudadDropDTO>? cities;
+    private string? imageUrl;
+    string Estado = "A";
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public bool IsAdmin { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadCountriesAsync();
+    }
+
+    private void ImageSelected(string imagenBase64)
+    {
+        userDTO.Photo = imagenBase64;
+        imageUrl = null;
+    }
+
+    private async Task LoadCountriesAsync()
+    {
+        var responseHttp = await repository.Get<List<PaisDropDTO>>($"/api/Paises/ComboPais/{Estado}");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        countries = responseHttp.Response;
+    }
+
+    private async Task CountryChangedAsync(ChangeEventArgs e)
+    {
+        var selectedCountry = Convert.ToInt32(e.Value!);
+        await LoadStatesAsyn(selectedCountry);
+    }
+
+    private async Task LoadStatesAsyn(int countryId)
+    {
+        var responseHttp = await repository.Get<List<ProvinciaDropDTO>>($"/api/Provincias/ComboProvincia/{countryId}/{Estado}");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        states = responseHttp.Response;
+    }
+
+    private async Task StateChangedAsync(ChangeEventArgs e)
+    {
+        var selectedState = Convert.ToInt32(e.Value!);
+        await LoadCitiesAsyn(selectedState);
+    }
+
+    private async Task LoadCitiesAsyn(int stateId)
+    {
+        var responseHttp = await repository.Get<List<CiudadDropDTO>>($"/api/Ciudades/ComboCiudades/{stateId}/{Estado}");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        cities = responseHttp.Response;
+    }
+
+    private async Task CreteUserAsync()
+    {
+        userDTO.UserName = userDTO.Email;
+
+        if (IsAdmin)
+        {
+            userDTO.UserType = UserType.Admin;
+        }
+        else
+        {
+            userDTO.UserType = UserType.User;
+        }
+
+        var responseHttp = await repository.Post<UserDTO>("/api/Accounts/CreateUser", userDTO);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        await sweetAlertService.FireAsync("Confirmación", "Su cuenta ha sido creada con éxito. Se te ha enviado un correo electrónico con las instrucciones para activar tu usuario.", SweetAlertIcon.Info);
+        navigationManager.NavigateTo("/");
+    }
+
+    private void Login()
+    {
+        navigationManager.NavigateTo("/Login");
+    }
+
+    private void ResetForm()
+    {
+        userDTO = new UserDTO(); // Crea un nuevo objeto vacío
+    }
+}

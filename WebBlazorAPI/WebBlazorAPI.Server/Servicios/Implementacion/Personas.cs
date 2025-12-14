@@ -18,49 +18,49 @@ namespace WebBlazorAPI.Server.Servicios.Implementacion
         }
 
 
-        public async Task<PersonaDTO> CreatePersona(PersonaDTO modelo)
-        {
-            try
-            {
-                var dbModelo = _mapper.Map<Persona>(modelo);
+        //public async Task<PersonaDTO> CreatePersona(PersonaDTO modelo)
+        //{
+        //    try
+        //    {
+        //        var dbModelo = _mapper.Map<Persona>(modelo);
 
-                var RspModelo = await _modeloRepositorio.CreateReg(dbModelo);
-                if (RspModelo.Id_persona != 0)
-                    return _mapper.Map<PersonaDTO>(RspModelo);
-                else
-                    throw new TaskCanceledException("Nose puede crear");
+        //        var RspModelo = await _modeloRepositorio.CreateReg(dbModelo);
+        //        if (RspModelo.Id_persona != 0)
+        //            return _mapper.Map<PersonaDTO>(RspModelo);
+        //        else
+        //            throw new TaskCanceledException("Nose puede crear");
 
-            }
-            catch (Exception)
-            {
+        //    }
+        //    catch (Exception)
+        //    {
 
-                throw;
-            }
-        }
+        //        throw;
+        //    }
+        //}
 
-        public async Task<bool> DeletePersona(int id)
-        {
-            try
-            {
-                var consulta = _modeloRepositorio.GetAllWithWhere(p => p.Id_persona == id);
-                var fromDbmodelo = await consulta.FirstOrDefaultAsync();
-                if (fromDbmodelo != null)
-                {
-                    var respuesta = await _modeloRepositorio.Delete(fromDbmodelo);
-                    if (!respuesta)
-                        throw new TaskCanceledException("No se puedo Eliminar");
-                    return respuesta;
-                }
-                else
-                { throw new TaskCanceledException("No nose encontraron datos"); }
+        //public async Task<bool> DeletePersona(int id)
+        //{
+        //    try
+        //    {
+        //        var consulta = _modeloRepositorio.GetAllWithWhere(p => p.Id_persona == id);
+        //        var fromDbmodelo = await consulta.FirstOrDefaultAsync();
+        //        if (fromDbmodelo != null)
+        //        {
+        //            var respuesta = await _modeloRepositorio.Delete(fromDbmodelo);
+        //            if (!respuesta)
+        //                throw new TaskCanceledException("No se puedo Eliminar");
+        //            return respuesta;
+        //        }
+        //        else
+        //        { throw new TaskCanceledException("No nose encontraron datos"); }
 
-            }
-            catch (Exception)
-            {
+        //    }
+        //    catch (Exception)
+        //    {
 
-                throw;
-            }
-        }
+        //        throw;
+        //    }
+        //}
 
         public async Task<bool> DeletePersonaLogica(int id)
         {
@@ -87,25 +87,25 @@ namespace WebBlazorAPI.Server.Servicios.Implementacion
             }
         }
 
-        public async Task<List<PersonaDTO>> GetListaAllPersonas()
-        {
+        //public async Task<List<PersonaDTO>> GetListaAllPersonas()
+        //{
 
-            try
-            {
-                var consulta = _modeloRepositorio.GetAll()
-                    .Include(x => x.Ciudades)
-                    .OrderBy(m => m.Id_persona);
-                List<PersonaDTO> lista = _mapper.Map<List<PersonaDTO>>(await consulta.ToListAsync());
-                return lista;
+        //    try
+        //    {
+        //        var consulta = _modeloRepositorio.GetAll()
+        //            .Include(x => x.Ciudades)
+        //            .OrderBy(m => m.Id_persona);
+        //        List<PersonaDTO> lista = _mapper.Map<List<PersonaDTO>>(await consulta.ToListAsync());
+        //        return lista;
 
-            }
-            catch (Exception ex)
-            {
+        //    }
+        //    catch (Exception ex)
+        //    {
 
-                throw ex;
-            }
+        //        throw ex;
+        //    }
 
-        }
+        //}
 
 
         public async Task<List<PersonaDTO>> GetListPersonaActivo(string Estado_Activo)
@@ -131,26 +131,26 @@ namespace WebBlazorAPI.Server.Servicios.Implementacion
             }
         }
 
-        public async Task<PersonaDTO> GetPersona(int id)
-        {
-            try
-            {
-                var consulta = _modeloRepositorio.GetAllWithWhere(p => p.Id_persona == id);
-                var fromDBmodelo = await consulta.FirstOrDefaultAsync();
-                if (fromDBmodelo != null)
-                {
-                    return _mapper.Map<PersonaDTO>(fromDBmodelo);
-                }
-                else
-                { throw new TaskCanceledException("No nose encontraron considencia"); }
+        //public async Task<PersonaDTO> GetPersona(int id)
+        //{
+        //    try
+        //    {
+        //        var consulta = _modeloRepositorio.GetAllWithWhere(p => p.Id_persona == id);
+        //        var fromDBmodelo = await consulta.FirstOrDefaultAsync();
+        //        if (fromDBmodelo != null)
+        //        {
+        //            return _mapper.Map<PersonaDTO>(fromDBmodelo);
+        //        }
+        //        else
+        //        { throw new TaskCanceledException("No nose encontraron considencia"); }
 
-            }
-            catch (Exception ex)
-            {
+        //    }
+        //    catch (Exception ex)
+        //    {
 
-                throw ex;
-            }
-        }
+        //        throw ex;
+        //    }
+        //}
 
         public async Task<PersonaDTO> GetPersonaByUser(string email)
         {
@@ -226,48 +226,48 @@ namespace WebBlazorAPI.Server.Servicios.Implementacion
             }
         }
 
-        public async Task<bool> UpdatePersona(PersonaDTO modelo)
-        {
-            try
-            {
-                var consulta = _modeloRepositorio.GetAllWithWhere(p => p.Id_persona == modelo.Id_persona);
-                var fromDbmodelo = await consulta.FirstOrDefaultAsync();
-                if (fromDbmodelo != null)
-                {
-                    fromDbmodelo.Id_user = modelo.Id_user;
-                    fromDbmodelo.Nombre = modelo.Nombre;
-                    fromDbmodelo.Apellido = modelo.Apellido;
-                    fromDbmodelo.Tipo_documento = modelo.Tipo_documento;
-                    fromDbmodelo.Numero_documento = modelo.Numero_documento;
-                    fromDbmodelo.Date_nacimiento = modelo.Date_nacimiento;
-                    fromDbmodelo.Genero = modelo.Genero;
-                    fromDbmodelo.Estado_civil = modelo.Estado_civil;
-                    fromDbmodelo.Nacionalidad = modelo.Nacionalidad;
-                    fromDbmodelo.Ocupacion = modelo.Ocupacion;
-                    fromDbmodelo.Nivel_estudio = modelo.Nivel_estudio;
-                    fromDbmodelo.Id_ciudad = modelo.Id_ciudad;
-                    fromDbmodelo.Cap_persona = modelo.Cap_persona;
-                    fromDbmodelo.Direccion_persona = modelo.Direccion_persona;
-                    fromDbmodelo.Telefono = modelo.Telefono;
-                    fromDbmodelo.Email = modelo.Email;
-                    fromDbmodelo.Foto = modelo.Foto;
-                    fromDbmodelo.Informacion = modelo.Informacion;
-                    fromDbmodelo.Estado_persona = modelo.Estado_persona;
-                    var respuesta = await _modeloRepositorio.Upadate(fromDbmodelo);
-                    if (!respuesta)
-                        throw new TaskCanceledException("No se puedo Editar");
-                    return respuesta;
-                }
-                else
-                { throw new TaskCanceledException("No nose encontraron datos"); }
+        //public async Task<bool> UpdatePersona(PersonaDTO modelo)
+        //{
+        //    try
+        //    {
+        //        var consulta = _modeloRepositorio.GetAllWithWhere(p => p.Id_persona == modelo.Id_persona);
+        //        var fromDbmodelo = await consulta.FirstOrDefaultAsync();
+        //        if (fromDbmodelo != null)
+        //        {
+        //            fromDbmodelo.Id_user = modelo.Id_user;
+        //            fromDbmodelo.Nombre = modelo.Nombre;
+        //            fromDbmodelo.Apellido = modelo.Apellido;
+        //            fromDbmodelo.Tipo_documento = modelo.Tipo_documento;
+        //            fromDbmodelo.Numero_documento = modelo.Numero_documento;
+        //            fromDbmodelo.Date_nacimiento = modelo.Date_nacimiento;
+        //            fromDbmodelo.Genero = modelo.Genero;
+        //            fromDbmodelo.Estado_civil = modelo.Estado_civil;
+        //            fromDbmodelo.Nacionalidad = modelo.Nacionalidad;
+        //            fromDbmodelo.Ocupacion = modelo.Ocupacion;
+        //            fromDbmodelo.Nivel_estudio = modelo.Nivel_estudio;
+        //            fromDbmodelo.Id_ciudad = modelo.Id_ciudad;
+        //            fromDbmodelo.Cap_persona = modelo.Cap_persona;
+        //            fromDbmodelo.Direccion_persona = modelo.Direccion_persona;
+        //            fromDbmodelo.Telefono = modelo.Telefono;
+        //            fromDbmodelo.Email = modelo.Email;
+        //            fromDbmodelo.Foto = modelo.Foto;
+        //            fromDbmodelo.Informacion = modelo.Informacion;
+        //            fromDbmodelo.Estado_persona = modelo.Estado_persona;
+        //            var respuesta = await _modeloRepositorio.Upadate(fromDbmodelo);
+        //            if (!respuesta)
+        //                throw new TaskCanceledException("No se puedo Editar");
+        //            return respuesta;
+        //        }
+        //        else
+        //        { throw new TaskCanceledException("No nose encontraron datos"); }
 
-            }
-            catch (Exception)
-            {
+        //    }
+        //    catch (Exception)
+        //    {
 
-                throw;
-            }
-        }
+        //        throw;
+        //    }
+        //}
 
     }
 }

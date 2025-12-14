@@ -1,0 +1,159 @@
+﻿@using WebBlazorAPI.Shared.DTO.Pais
+@using WebBlazorAPI.Shared.Estatico
+@using WebBlazorAPI.WebSite.Repositorio
+
+@inject ToastService ToastService
+@inject SweetAlertService sweetAlertService
+@inject IRepository repository
+
+<div class="principal">
+    <div class="formulario">
+
+        <!-- Título -->
+        <div class="form-panel">
+            <h2 class="form-title"><i class="bi bi-ui-checks-grid"></i>@Titulo</h2>
+        </div>
+
+        <EditForm Model="Input" OnValidSubmit="SubmitForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary></ValidationSummary>
+                <div class="form-wrapper">
+
+                <!-- Nombre del país -->
+                <div class="form-group">
+                    <label>Nombre del País:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-globe"></i></span>
+                        <input type="text"
+                               @bind="Input.Nombre_pais"
+                               class="form-control"
+                               placeholder="Ingrese nombre del país" />                    
+                    </div>
+                    <ValidationMessage For="() => Input.Nombre_pais" />
+                </div>
+
+                <!-- Información -->
+                <div class="form-group" style="flex:1 1 100%">
+                    <label>Información:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-info-circle"></i></span>
+                        <textarea @bind="Input.Informacion"
+                                  class="form-control"
+                                  rows="4"
+                                  placeholder="Ingrese información"></textarea>
+                    </div>
+                </div>
+
+                <!-- Imagen -->
+                <div class="form-group">
+                    <label>Foto:</label>
+                    <Image Src="@previewUrl"
+                           IsThumbnail="true"
+                           Alt="placeholder"
+                           style="max-width:250px; border:1px solid #ccc; border-radius:8px;" />
+                    <br />
+                    <InputFile OnChange="CargarImagen" accept=".jpg,.jpeg,.png" />
+                </div>
+
+                <!-- Estado -->
+                <div class="form-group">
+                    <label>Estado:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-list"></i></span>
+                        <select @bind="Input.Estado_pais" class="form-control">
+                            <option value="">Seleccione</option>
+                            @foreach (var item in items)
+                            {
+                                <option value="@item.Id">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <ValidationMessage For="() => Input.Estado_pais" />
+                </div>
+
+                <!-- Botones -->
+                <div class="buttons-container">
+                    <button type="submit" class="btn btn-primary">@SubmitButtonText</button>
+                    <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                </div>
+
+            </div>
+        </EditForm>
+
+    </div>
+</div>
+
+
+@code {
+    [CascadingParameter] BlazoredModalInstance Modal { get; set; } = default!;
+    [Parameter] public PaisDTO InputDTO { get; set; } = new PaisDTO();
+    [Parameter] public string SubmitButtonText { get; set; }=   string.Empty;
+    [Parameter] public string Titulo { get; set; } = string.Empty;
+    
+
+    private PaisDTO Input = new();
+    private List<Estado> items = new();
+    private string? previewUrl;
+
+    protected override void OnInitialized()
+    {
+        items = Estado.GetItems();
+        if (InputDTO != null)
+        {
+            Input = InputDTO;
+            previewUrl = Input.Foto_pais != null ? $"data:image/jpeg;base64,{Convert.ToBase64String(Input.Foto_pais)}" : null;
+        }
+    }
+
+    private async Task CargarImagen(InputFileChangeEventArgs e)
+    {
+        var archivo = e.File;
+        if (archivo != null)
+        {
+            using var stream = archivo.OpenReadStream(10_000_000);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            previewUrl = $"data:{archivo.ContentType};base64,{Convert.ToBase64String(ms.ToArray())}";
+        }
+    }
+
+    private async Task SubmitForm()
+    {
+        Input.Foto_pais = previewUrl != null ? Convert.FromBase64String(previewUrl.Split(',')[1]) : null;
+
+        if (SubmitButtonText == "Save")
+        {
+            var responseHttp = await repository.Post<PaisDTO>("/api/Paises/", Input);
+            if (responseHttp.Error)
+            {
+                var message = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+                return;
+            }
+            ToastService.Notify(new(ToastType.Success, $"Record Pais Update Successfully."));
+            await Task.Delay(3000);
+            await Modal.CloseAsync(ModalResult.Ok(Input));
+            return;
+        }
+        if (SubmitButtonText == "Update")
+        {
+            var responseHttp = await repository.Put<PaisDTO>($"/api/Paises/", Input);
+            if (responseHttp.Error)
+            {
+                var message = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+                return;
+            }
+
+            ToastService.Notify(new(ToastType.Success, $"Record Pais Saved Successfully."));
+            await Task.Delay(3000);
+            await Modal.CloseAsync(ModalResult.Ok(Input));
+            return;
+        }
+    }
+
+    private async Task Cancelar()
+    {
+        await Modal.CancelAsync();
+    }
+}

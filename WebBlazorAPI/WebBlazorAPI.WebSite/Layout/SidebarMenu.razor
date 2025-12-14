@@ -1,0 +1,45 @@
+﻿<Sidebar2 @ref="sidebar2"
+          Href="/"
+          IconName="IconName.BootstrapFill"
+          Title="System Automation"
+          BadgeText="v2.1.0"
+          ShowIcons="true"
+          Width="300"
+          WidthUnit="Unit.Px"
+          DataProvider="Sidebar2DataProvider" />
+
+@code {
+    private Sidebar2 sidebar2 = default!;
+    private IEnumerable<NavItem>? navItems;
+
+    private async Task<Sidebar2DataProviderResult> Sidebar2DataProvider(Sidebar2DataProviderRequest request)
+    {
+        if (navItems is null)
+            navItems = GetNavItems();
+
+        await Task.Delay(200); // Simula carga de datos
+        return await Task.FromResult(request.ApplyTo(navItems));
+    }
+
+    private IEnumerable<NavItem> GetNavItems()
+    {
+        navItems = new List<NavItem>
+        {
+            new NavItem { Id = "1", Href = "/", IconName = IconName.HouseDoorFill, Text = "Home",IconColor = IconColor.Primary },
+
+            new NavItem { Id = "2", Href = "/Dasboard",IconName = IconName.Grid, Text = "Dashboad" ,IconColor = IconColor.Primary},
+
+            new NavItem { Id = "3", Href = "#", IconName = IconName.Lock, Text = "Athentication" ,IconColor = IconColor.Primary},
+
+            new NavItem { Id = "4", Href = "/Login", IconName = IconName.BoxArrowInRight, Text = "Login", IconColor = IconColor.Primary, ParentId="3" },
+            
+            new NavItem { Id = "5", Href = "/Register", IconName = IconName.PersonPlus , IconColor = IconColor.Primary, Text = "Register", ParentId="3" },
+            
+            new NavItem { Id = "6", Href = "/Contact" ,IconName = IconName.Globe, Text = "Contacto" ,IconColor = IconColor.Primary}
+            
+        };
+        return navItems;
+    }
+
+    public void ToggleSidebar() => sidebar2.ToggleSidebar();
+}

@@ -1,0 +1,170 @@
+﻿@using WebBlazorAPI.Shared.DTO.Pais
+@using WebBlazorAPI.Shared.DTO.Provincia
+@using WebBlazorAPI.Shared.Estatico
+@using WebBlazorAPI.WebSite.Repositorio
+
+@inject ToastService ToastService
+@inject SweetAlertService sweetAlertService
+@inject IRepository repository
+
+<div class="principal">
+    <div class="formulario">
+
+        <!-- Título -->
+        <div class="form-panel">
+            <h2 class ="form-title"><i class="bi bi-ui-checks-grid"></i>@Titulo</h2>
+        </div>
+
+        <EditForm Model="Input" OnValidSubmit="SubmitForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary></ValidationSummary>
+            <div class="form-wrapper">
+
+                <!-- País -->
+                <div class="form-group">
+                    <label>Nombre País:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-globe"></i></span>
+                        <select class="form-control" @onchange="CountryChangedAsync">
+                            <option value="">Seleccione un país</option>
+                            @if (countries is not null)
+                            {
+                                @foreach (var country in countries)
+                                {
+                                    <option value="@country.Id_pais">@country.Nombre_pais</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <ValidationMessage For="() => Input.Id_pais" />
+                </div>
+
+                <!-- Nombre Provincia -->
+                <div class="form-group">
+                    <label>Nombre Provincia:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-city"></i></span>
+                        <input type="text" class="form-control" placeholder="Nombre Provincia" @bind="Input.Nombre_provincia" />
+                    </div>
+                    <ValidationMessage For="() => Input.Nombre_provincia" />
+                </div>
+
+                <!-- Información -->
+                <div class="form-group" style="flex:1 1 100%">
+                    <label>Información:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-info-circle"></i></span>
+                        <textarea class="form-control"
+                                  rows="4"
+                                  placeholder="Ingrese información"
+                                  @bind="Input.Informacion_provincia"></textarea>
+                    </div>
+                </div>
+
+                <!-- Estado -->
+                <div class="form-group">
+                    <label>Estado:</label>
+                    <div class="input-icon">
+                        <span class="icon"><i class="fas fa-list"></i></span>
+                        <select class="form-control" @bind="Input.Estado_provincia">
+                            <option value="">Seleccione</option>
+                            @foreach (var item in items)
+                            {
+                                <option value="@item.Id">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <ValidationMessage For="() => Input.Estado_provincia" />
+                </div>
+
+                <!-- Botones -->
+                <div class="buttons-container">
+                    <button type="submit" class="btn btn-primary">@SubmitButtonText</button>
+                    <button type="button" class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+                </div>
+
+            </div>
+        </EditForm>
+
+    </div>
+</div>
+
+@code {
+
+    [CascadingParameter] BlazoredModalInstance Modal { get; set; } = default!;
+    [Parameter] public ProvinciaDTO InputDTO { get; set; } = new ProvinciaDTO();
+    [Parameter] public string SubmitButtonText { get; set; } = string.Empty;
+    [Parameter] public string Titulo { get; set; } = string.Empty;
+    private List<PaisDropDTO>? countries;
+
+    private ProvinciaDTO Input = new();
+    private List<Estado> items = new();
+    string Estados = "A";
+
+    private async Task SubmitForm()
+    {
+        if (SubmitButtonText == "Save")
+        {
+            var responseHttp = await repository.Post<ProvinciaDTO>("/api/Provincias/", Input);
+            if (responseHttp.Error)
+            {
+                var message = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+                return;
+            }
+            ToastService.Notify(new(ToastType.Success, $"Record Pais Update Successfully."));
+            await Task.Delay(3000);
+            await Modal.CloseAsync(ModalResult.Ok(Input));
+            return;
+        }
+        if (SubmitButtonText == "Update")
+        {
+            var responseHttp = await repository.Put<ProvinciaDTO>($"/api/Provincias/", Input);
+            if (responseHttp.Error)
+            {
+                var message = await responseHttp.GetErrorMessageAsync();
+                await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+                return;
+            }
+            ToastService.Notify(new(ToastType.Success, $"Record Pais Saved Successfully."));
+            await Task.Delay(3000);
+            await Modal.CloseAsync(ModalResult.Ok(Input));
+            return;
+        }
+    }
+
+    private async Task Cancelar()
+    {
+        await Modal.CancelAsync();
+    }
+
+    private async Task LoadCountriesAsync()
+    {
+        var responseHttp = await repository.Get<List<PaisDropDTO>>($"/api/Paises/ComboPais/{Estados}");
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message, SweetAlertIcon.Error);
+            return;
+        }
+
+        countries = responseHttp.Response;
+    }
+
+    private async Task CountryChangedAsync(ChangeEventArgs e)
+    {
+        var selectedCountry = Convert.ToInt32(e.Value!);
+        Input.Id_pais = selectedCountry;
+    }
+    protected async override Task OnParametersSetAsync()
+    {
+        items = Estado.GetItems();
+        await LoadCountriesAsync();
+        if (InputDTO != null)
+        {
+            Input = InputDTO;
+            //countries. =Input.Id_pais;
+        }
+        
+    }
+}

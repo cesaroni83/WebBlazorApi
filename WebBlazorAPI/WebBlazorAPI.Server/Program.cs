@@ -75,6 +75,12 @@ builder.Services.AddScoped<IGoogleAuthorization, GoogleAuthorization>();
 builder.Services.AddScoped<IApiService, ApiService>();
 builder.Services.AddTransient(typeof(IGenericoModelo<>), typeof(GenericoModelo<>));
 builder.Services.AddScoped<IPersonas, Personas>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IMenus, Menus>();
+builder.Services.AddScoped<IPaises, Paises>();
+builder.Services.AddScoped<IProvincias, Provincias>();
+builder.Services.AddScoped<ICiudades, Ciudades>();
+
 
 
 
@@ -96,6 +102,9 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor(); // ?? esto registra SignalR automáticamente
 
+// Servicios de Razor Pages / Blazor
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor(); // 🔹 esto registra SignalR automáticamente
 ///*****************
 //-------------------- Authentication --------------------//
 builder.Services.AddAuthentication(options =>
@@ -109,6 +118,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+
 })
 .AddJwtBearer(options =>
 {
@@ -184,10 +194,6 @@ builder.Services.AddAuthentication(options =>
             // ? Agregar el claim manualmente
             context.Identity.AddClaim(new Claim("urn:facebook:picture", pictureUrl!));
         },
-
-
-
-
         OnRemoteFailure = context =>
         {
             context.Response.Redirect("/Login");
@@ -196,6 +202,7 @@ builder.Services.AddAuthentication(options =>
         }
     };
 })
+
 //-------------------- Handler personalizado para tokens Google --------------------//
 .AddScheme<AuthenticationSchemeOptions, GoogleAccessTokenAuthenticationHandler>(
     Constant.Scheme, "GoogleAccessToken", null);
@@ -225,6 +232,7 @@ void SeedData(WebApplication app)
     var service = scope.ServiceProvider.GetRequiredService<SeedDB>();
     service.SeedAsync().Wait();
 }
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -266,6 +274,4 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.MapControllers();
-app.MapBlazorHub();               // 🔹 necesario para Blazor Server
-app.MapFallbackToFile("index.html");// página de fallback
 app.Run();

@@ -1,0 +1,226 @@
+﻿
+/* CONTENEDOR GENERAL */
+.loginpage-html, .loginpage-body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.loginpage-principal {
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* CONTENEDOR LOGIN */
+.loginpage-container {
+    background: white;
+    border-radius: 20px;
+    width: 900px;
+    max-width: 100%;
+    height: auto;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    position: relative;
+}
+
+.loginpage-wrapper {
+    display: flex;
+    width: 200%;
+    height: 100%;
+    transition: transform 0.6s ease-in-out;
+}
+
+/* PANEL */
+.loginpage-panel {
+    width: 50%;
+    height: 100%;
+    display: flex;
+}
+
+/* PANEL AZUL */
+.loginpage-left-blue {
+    background: #6888ff;
+    color: white;
+    text-align: center;
+    border-radius: 20px 0 0 20px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 300px;
+}
+
+/* PANEL BLANCO */
+.loginpage-right-white {
+    background: #fff;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 300px;
+    max-width: 600px;
+    overflow-y: auto;
+}
+
+/* TABS */
+.loginpage-tabs {
+    width: 100%;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #6888ff;
+    display: flex;
+    gap: 10px;
+}
+
+.loginpage-tab-btn {
+    flex: 1;
+    padding: 10px 0;
+    background: #eee;
+    border: none;
+    border-radius: 5px 5px 0 0;
+    cursor: pointer;
+    font-weight: bold;
+    color: #333;
+    transition: background 0.3s ease;
+}
+
+    .loginpage-tab-btn.active {
+        background: #6888ff;
+        color: white;
+    }
+
+/* TAB CONTENT */
+.loginpage-tab-content {
+    display: none;
+    width: 100%;
+}
+
+    .loginpage-tab-content.active {
+        display: block;
+    }
+
+/* ICONOS SOCIALES */
+.loginpage-social-icons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+    .loginpage-social-icons button {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #eee;
+        color: #333;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        font-size: 1.2em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+/* INPUTS CON ICONOS */
+.input-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.loginpage-container input {
+    padding-left: 40px; /* Asegura que haya suficiente espacio para los iconos */
+    font-size: 16px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.input-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #888;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+
+    .loginpage-wrapper {
+        flex-direction: column;
+        transform: none !important;
+        width: 100%;
+        height: auto;
+    }
+
+    .loginpage-panel {
+        width: 100%;
+        flex-direction: column;
+        height: auto;
+        margin-bottom: 20px;
+    }
+
+    .loginpage-left-blue,
+    .loginpage-right-white {
+        width: 100% !important;
+        border-radius: 0 !important;
+    }
+
+    /* Ajuste en iconos sociales para pantallas pequeñas */
+    .loginpage-social-icons {
+        justify-content: center;
+    }
+
+        .loginpage-social-icons button {
+            width: 35px;
+            height: 35px; /* Ajusta el tamaño de los iconos */
+        }
+
+    /* Ajustes en los inputs */
+    .loginpage-container input {
+        padding-left: 30px; /* Ajusta el padding en dispositivos pequeños */
+        height: 35px; /* Ajusta la altura de los inputs en pantallas pequeñas */
+    }
+
+    .input-icon {
+        font-size: 18px; /* Reduce el tamaño del icono en pantallas pequeñas */
+    }
+}
+
+/* INPUTS CON ICONOS */
+.input-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.loginpage-container input {
+    padding-left: 40px; /* Asegura que haya suficiente espacio para los iconos */
+    font-size: 16px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.input-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #888;
+    pointer-events: none; /* Esto evita que el ícono bloquee la interacción con el input */
+}

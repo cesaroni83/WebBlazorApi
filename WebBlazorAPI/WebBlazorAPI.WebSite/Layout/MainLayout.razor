@@ -1,16 +1,57 @@
 ﻿@inherits LayoutComponentBase
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<div class="bb-page">
 
+    <!-- Sidebar -->
+    <AuthorizeView>
+        <Authorized>
+            <MenuDinamico @ref="SideMenuDinamic" />
+        </Authorized>
+        <NotAuthorized>
+            <SidebarMenu @ref="appSidebar" />
+        </NotAuthorized>
+    </AuthorizeView>
+
+    <!-- Contenido principal -->
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        <!-- Top bar -->
+        <div class="bb-top-row px-4 d-flex justify-content-between">
+            <Icon Name="IconName.List" role="button" @onclick="ToggleSidebar" />
+            <div class="bb-top-row bb-top-row-sticky px-4 d-flex justify-content-end gap-2">
+                <AuthLinks></AuthLinks>
+                <div class="float-end" style="font-size:1.2rem;">
+                    <ThemeSwitcher Position="DropdownMenuPosition.End" Style="font-size:1.2rem;" />
+                </div>
+                <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+            </div>
         </div>
 
+        <!-- Renderizado de páginas -->
         <article class="content px-4">
             @Body
         </article>
     </main>
+
 </div>
+<Toasts class="p-3" AutoHide="true" Delay="2000" Placement="ToastsPlacement.TopRight" StackLength="3" />
+<Preload LoadingText="Loading..." />
+@code {
+    private SidebarMenu appSidebar = default!;
+    private MenuDinamico SideMenuDinamic = default!;
+
+    private async Task ToggleSidebar()
+    {
+        // Intenta cerrar el Sidebar autorizado si existe y está visible
+        if (SideMenuDinamic is not null)
+        {
+            SideMenuDinamic.ToggleSidebar();
+            return;
+        }
+
+        // Si no, cierra el Sidebar no autorizado
+        if (appSidebar is not null)
+        {
+            appSidebar.ToggleSidebar();
+        }
+    }
+
+}
